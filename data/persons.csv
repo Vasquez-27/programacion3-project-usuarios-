@@ -1,1 +1,1 @@
-id;typedoc_code;document;first_name;last_name;gender;birth_date;location_code
+id,name,lastname,age,gender,typedoc_code,typedoc_description,location_code,location_description

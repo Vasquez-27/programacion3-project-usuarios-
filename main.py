@@ -29,7 +29,7 @@ set_typedoc_service(typedoc_service)
 # Incluir routers
 app.include_router(person_router, prefix="/api/v1/persons", tags=["Persons"])
 app.include_router(typedoc_router, prefix="/api/v1/typedocs", tags=["TypeDocs"])
-app.include_router(location_router, prefix="/api/v1/locations", tags=["Locations"])
+app.include_router(location_router, prefix="/api/v1/locations", tags=["Locations"])  # ✅ Correcto
 
 # Registrar excepciones personalizadas
 register_exception_handlers(app)

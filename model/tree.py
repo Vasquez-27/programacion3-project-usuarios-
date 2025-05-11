@@ -2,7 +2,6 @@ from typing import List, Optional
 from pydantic import BaseModel
 from .person import Person
 
-
 class NodeN(BaseModel):
     person: Person
     children: List["NodeN"] = []
@@ -20,6 +19,23 @@ class NodeN(BaseModel):
                 return True
         return False
 
+    def update_person_by_id(self, id: str, updated_person: Person) -> bool:
+        if self.person.id == id:
+            self.person = updated_person
+            return True
+        for child in self.children:
+            if child.update_person_by_id(id, updated_person):
+                return True
+        return False
+
+    def find_person_by_id(self, id: str) -> Optional[Person]:
+        if self.person.id == id:
+            return self.person
+        for child in self.children:
+            found = child.find_person_by_id(id)
+            if found:
+                return found
+        return None
 
 class TreeN(BaseModel):
     root: Optional[NodeN] = None
@@ -44,13 +60,30 @@ class TreeN(BaseModel):
         return False
 
     def get_persons(self) -> List[Person]:
-        if self.root is None:
-            return []
         result = []
-        self.traverse_tree(self.root, result)
+        if self.root:
+            self.traverse_tree(self.root, result)
         return result
 
     def traverse_tree(self, node: NodeN, result: List[Person]) -> None:
         result.append(node.person)
         for child in node.children:
             self.traverse_tree(child, result)
+
+    def get_person_by_id(self, person_id: str) -> Optional[Person]:
+        if not self.root:
+            return None
+        return self.root.find_person_by_id(person_id)
+
+    def update_person(self, id: str, updated_person: Person) -> bool:
+        if not self.root:
+            return False
+        return self.root.update_person_by_id(id, updated_person)
+
+    def delete_person(self, id: str) -> bool:
+        if not self.root:
+            return False
+        if self.root.person.id == id:
+            self.root = None
+            return True
+        return self.root.remove_child_by_id(id)

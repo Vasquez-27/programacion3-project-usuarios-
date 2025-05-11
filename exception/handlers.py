@@ -24,10 +24,14 @@ def register_exception_handlers(app: FastAPI):
             content={"error": exc.detail},
         )
 
+    # ⚠️ Solo para depuración: muestra mensaje de error real
     @app.exception_handler(Exception)
     async def general_exception_handler(request: Request, exc: Exception):
-        # Fallback for all other unhandled exceptions
+        import traceback
         return JSONResponse(
             status_code=500,
-            content={"error": "An unexpected error occurred"},
+            content={
+                "error": str(exc),
+                "trace": traceback.format_exc()
+            },
         )

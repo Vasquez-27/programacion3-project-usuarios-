@@ -3,6 +3,8 @@ import os
 from typing import List, Optional
 from model.person import Person
 from model.tree import TreeN
+from model.typedoc import Typedoc
+from model.location import Location
 
 # ----------------------------
 # Instancia global del servicio
@@ -33,30 +35,65 @@ class PersonService:
             for row in reader:
                 person = Person(
                     id=row["id"],
-                    typedoc_code=int(row["typedoc_code"]),
-                    document=row["document"],
-                    first_name=row["first_name"],
-                    last_name=row["last_name"],
+                    name=row["name"],
+                    lastname=row["lastname"],
+                    age=int(row["age"]),
                     gender=row["gender"],
-                    birth_date=row["birth_date"],
-                    location_code=int(row["location_code"])
+                    typedoc=Typedoc(
+                        code=int(row["typedoc_code"]),
+                        description=row["typedoc_description"]
+                    ),
+                    location=Location(
+                        code=int(row["location_code"]),
+                        description=row["location_description"]
+                    )
                 )
                 self.tree.create_person(person)
 
     def _save_person_to_csv(self, person: Person):
         file_exists = os.path.exists(self.csv_path)
         with open(self.csv_path, mode="a", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=person.model_fields.keys())
+            fieldnames = [
+                "id", "name", "lastname", "age", "gender",
+                "typedoc_code", "typedoc_description",
+                "location_code", "location_description"
+            ]
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
             if not file_exists:
                 writer.writeheader()
-            writer.writerow(person.dict())
+            writer.writerow({
+                "id": person.id,
+                "name": person.name,
+                "lastname": person.lastname,
+                "age": person.age,
+                "gender": person.gender,
+                "typedoc_code": person.typedoc.code,
+                "typedoc_description": person.typedoc.description,
+                "location_code": person.location.code,
+                "location_description": person.location.description
+            })
 
     def _rewrite_csv(self, persons: List[Person]):
         with open(self.csv_path, mode="w", newline="", encoding="utf-8") as f:
-            writer = csv.DictWriter(f, fieldnames=persons[0].model_fields.keys())
+            fieldnames = [
+                "id", "name", "lastname", "age", "gender",
+                "typedoc_code", "typedoc_description",
+                "location_code", "location_description"
+            ]
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             for person in persons:
-                writer.writerow(person.dict())
+                writer.writerow({
+                    "id": person.id,
+                    "name": person.name,
+                    "lastname": person.lastname,
+                    "age": person.age,
+                    "gender": person.gender,
+                    "typedoc_code": person.typedoc.code,
+                    "typedoc_description": person.typedoc.description,
+                    "location_code": person.location.code,
+                    "location_description": person.location.description
+                })
 
     def create_person(self, person: Person, parent_id: Optional[str] = None) -> bool:
         success = self.tree.create_person(person, parent_id)
